@@ -10,6 +10,7 @@ report.html
 # generated js
 /public/js
 /out
+package-lock.json
 
 # misc
 .DS_Store
