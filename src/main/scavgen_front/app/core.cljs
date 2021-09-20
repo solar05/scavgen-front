@@ -37,10 +37,31 @@
            [:p scav-info])
          scav-button])))))
 
+(defn scav-team []
+  (let [team-state (r/atom [])]
+    (fn []
+      (let [scav-button [:button
+                         {:on-click (fn []
+                                      (go (let [response (<! (http/get (build-url "/team") {:with-credentials? false}))]
+                                            (reset! health (:success response))
+                                            (when (= (:status response) 200)
+                                              (reset! team-state (:scavengers (:body response)))))))} "Generate team!"]]
+        (if (empty? @team-state)
+          [:div
+           [:p "Try generate new team!"]
+           scav-button]
+          (let [scavengers @team-state
+                scavs-info (reduce (fn [acc s] (conj acc [:p (str (:fullName s) " " (:rarity s))])) [:div] scavengers)]
+            [:div
+             scavs-info
+             scav-button]))))))
+
 (defn app []
   [:div
    (if (healthy?)
-     [simple-scav]
+     [:div
+      [simple-scav]
+      [scav-team]]
      [:div [:p "Service temporary unavailable ¯\\_(ツ)_/¯"]
       [:button {:on-click check-health} "Ping service!"]])])
 
